@@ -2,7 +2,7 @@
 // Added the ability to specify alternate credentials for explicit authentication. 
 // This can be particularly useful when running from a non-domain-joined machine with local user  or when there is a need to execute it as a different user.
 // @decoder_it
-// github 
+// github : decoder-it
 
 #include <iostream>
 #include "ms-dfsnm_h.h"
