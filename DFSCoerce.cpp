@@ -1,5 +1,5 @@
 // DFSCoerce.cpp : Original source form https://github.com/jfma7/DFSCoerce-exe
-// Add the ability to specify alternate credentials for explicit authentication. 
+// Added the ability to specify alternate credentials for explicit authentication. 
 // This can be particularly useful when running from a non-domain-joined machine with local user  or when there is a need to execute it as a different user.
 // @decoder_it
 // github 
